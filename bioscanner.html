@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="assets/js/qr.js"></script>
+<style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #reader { width: 300px; margin: auto; display: none; }
+    #status { font-weight: bold; margin-top: 20px; }
+    button { margin: 10px; padding: 10px; cursor: pointer; }
+</style>
+
+<body>
+    <h2 style="margin:1px;padding:3px;">Biometric QR Code Scanner</h2>
+    
+    <label for="nameSelect">Select Name:</label>
+    <select id="nameSelect"style="font-size: 20px;">
+        <option value="501">MALAZAGA, MARVIN P.</option>
+        <option value="720">SULATH, CRISTY O.</option>
+        <option value="616">AGUADO,AGUSTIN A.</option>
+        <option value="792">AGUILANDO,JOHN DOMINIC P.</option>
+        <option value="705">ALCAZAR,GLEN PATRICK P.</option>
+        <option value="521">ALMARIO,HEAVEN</option>
+        <option value="584">ALMAZAN,VILMA F.</option>
+        <option value="530">AMERICA,JERWIN C.</option>
+        <option value="8">BAYDO,BABYLYN V.</option>
+        <option value="709">BINALINGBING,RONEL C.</option>
+        <option value="502">BINASOY,JOEL C.</option>
+        <option value="719">BROQUEZA,RAYMUND O.</option>
+        <option value="624">CAÑETE,ROWEL D.</option>
+        <option value="523">CARUMBA,VENUS A.</option>
+        <option value="540">DELA CRUZ,MARK LESTER R.</option>
+        <option value="576">ESTIOLA,LIEZEL G.</option>
+        <option value="625">FERNANDEZ,JEFFERSON B.</option>
+        <option value="701">FERRER,TRICIA P.</option>
+        <option value="604">FLORES,ROWENA T.</option>
+        <option value="642">GONZAGA,DAMIEL</option>
+        <option value="518">GONZALES,NOEL S.</option>
+        <option value="718">GUALBERTO,CHARINA D.</option>
+        <option value="573">JACINTO,JOAN E.</option>
+        <option value="568">JUNIO,JOREM A.</option>
+        <option value="570">JURNADAL, BERNARDO JR. G.</option>
+        <option value="559">LADAO,JOEL C.</option>
+        <option value="710">LOPEZ,KIM SYMON D.</option>
+        <option value="560">LOPEZ,JOMARIE M.</option>
+        <option value="13">MACABUHAY,VIRLENE B.</option>
+        <option value="711">MALLANAO,JENNY LYNN G.</option>
+        <option value="655">MANAOG,RHOEL R.</option>
+        <option value="533">MANLAPAO,CHERYL C.</option>
+        <option value="567">MEDALLA,EMILY L.</option>
+        <option value="706">MENDOZA,BENERANDA B.</option>
+        <option value="621">MORAL,JAYMARK S.</option>
+        <option value="537">OBANIL,JELMA B.</option>
+        <option value="638">PALAPUZ,ROSALINDA M.</option>
+        <option value="707">PONIS,DHALIE A.</option>
+        <option value="508">PULGA,NELSON D.</option>
+        <option value="516">REPRADO,ERICSON S.</option>
+        <option value="7">SARMIENTO,JOSHUA KEAT F.</option>
+        <option value="546">SOTTO,ANDY O.</option>
+        <option value="716">TANUTAN,YONELA T.</option>
+        <option value="791">UDTOHAN,RONALD B.</option>
+        <option value="519">URQUIZA ,ALFONSO JR A.</option>
+        <option value="740">VILLAMOR,MAYFLOR D.</option>
+        <option value="564">VILLANUEVA,MIRRA F</option>
+        <option value="590">YOSORES,JONATHAN M.</option>
+
+    </select>
+
+
+    <button id="lockButton"style="font-size: 20px; margin:1px;padding:3px;">Lock</button>
+    <p id="lockedStatus"style="font-size: 20px; margin:1px;padding:3px;"></p>
+    <button id="checkIn" disabled style="font-size: 20px; margin:1px;padding:3px;">Check In</button>
+    <button id="checkOut" disabled style="font-size: 20px; margin:1px;padding:3px;">Check Out</button>
+    <p id="status" style="margin:1px;padding:3px; display: block; margin-left: auto; margin-right: auto;""></p>
+    <div id="reader" style="margin:1px;padding:3px; display: block; margin-left: auto; margin-right: auto;"></div>
+    <button id="downloadLog" style="font-size: 20px; margin:1px;padding:3px;">Download</button>
+    <button id="sendEmail" style="font-size: 20px; margin:1px;padding:3px;">E-mail</button>
+<p style="margin-left: 10%; text-align:left;">
+<br>Tap "Download" button,
+<br>> name the file that ends with ".dat" and wait the confirmation,
+<br>> tap "E-mail" button,
+<br>> tap "📎(attach),
+<br>> tap "≡" on the top-left,
+<br>> tap "▼ Downloads",
+<br>> look for and tap the file saved.
+<br>> tap "►" to send the e-mail.
+</p>
+    
+    <audio id="successBeep" src="assets/wav/success.mp3"></audio>
+    <audio id="errorBeep" src="assets/wav/error.mp3"></audio>
+    
+    <script>
+        let scanEnabled = false;
+        let mode = "";
+        let biometricNumber = "";
+        let logs = [];
+        let userName = "";
+        let scanner = null;
+        
+        const nameMapping = {
+"501": "MALAZAGA, MARVIN P.",
+"720": "SULATH, CRISTY O.",
+"616": "AGUADO,AGUSTIN A.",
+"792": "AGUILANDO,JOHN DOMINIC P.",
+"705": "ALCAZAR,GLEN PATRICK P.",
+"521": "ALMARIO,HEAVEN",
+"584": "ALMAZAN,VILMA F.",
+"530": "AMERICA,JERWIN C.",
+"8": "BAYDO,BABYLYN V.",
+"709": "BINALINGBING,RONEL C.",
+"502": "BINASOY,JOEL C.",
+"719": "BROQUEZA,RAYMUND O.",
+"624": "CAÑETE,ROWEL D.",
+"523": "CARUMBA,VENUS A.",
+"540": "DELA CRUZ,MARK LESTER R.",
+"576": "ESTIOLA,LIEZEL G.",
+"625": "FERNANDEZ,JEFFERSON B.",
+"701": "FERRER,TRICIA P.",
+"604": "FLORES,ROWENA T.",
+"642": "GONZAGA,DAMIEL",
+"518": "GONZALES,NOEL S.",
+"718": "GUALBERTO,CHARINA D.",
+"573": "JACINTO,JOAN E.",
+"568": "JUNIO,JOREM A.",
+"570": "JURNADAL, BERNARDO JR. G.",
+"559": "LADAO,JOEL C.",
+"710": "LOPEZ,KIM SYMON D.",
+"560": "LOPEZ,JOMARIE M.",
+"13": "MACABUHAY,VIRLENE B.",
+"711": "MALLANAO,JENNY LYNN G.",
+"655": "MANAOG,RHOEL R.",
+"533": "MANLAPAO,CHERYL C.",
+"567": "MEDALLA,EMILY L.",
+"706": "MENDOZA,BENERANDA B.",
+"621": "MORAL,JAYMARK S.",
+"537": "OBANIL,JELMA B.",
+"638": "PALAPUZ,ROSALINDA M.",
+"707": "PONIS,DHALIE A.",
+"508": "PULGA,NELSON D.",
+"516": "REPRADO,ERICSON S.",
+"7": "SARMIENTO,JOSHUA KEAT F.",
+"546": "SOTTO,ANDY O.",
+"716": "TANUTAN,YONELA T.",
+"791": "UDTOHAN,RONALD B.",
+"519": "URQUIZA ,ALFONSO JR A.",
+"740": "VILLAMOR,MAYFLOR D.",
+"564": "VILLANUEVA,MIRRA F",
+"590": "YOSORES,JONATHAN M."
+        };
+
+        function saveLogsToLocalStorage() {
+            localStorage.setItem("attendanceLogs", JSON.stringify(logs));
+        }
+        
+        function loadLogsFromLocalStorage() {
+            let savedLogs = localStorage.getItem("attendanceLogs");
+            if (savedLogs) {
+                logs = JSON.parse(savedLogs);
+            }
+        }
+        
+        document.getElementById("lockButton").addEventListener("click", function() {
+            biometricNumber = document.getElementById("nameSelect").value;
+            userName = document.getElementById("nameSelect").options[document.getElementById("nameSelect").selectedIndex].text;
+            localStorage.setItem("lockedUser", biometricNumber);
+            document.getElementById("lockedStatus").innerText = `Locked: ${userName}`;
+            document.getElementById("nameSelect").disabled = true;
+            document.getElementById("checkIn").disabled = false;
+            document.getElementById("checkOut").disabled = false;
+        });
+        
+        window.onload = function() {
+            let savedUser = localStorage.getItem("lockedUser");
+            if (savedUser) {
+                biometricNumber = savedUser;
+                userName = document.getElementById("nameSelect").options[document.getElementById("nameSelect").selectedIndex].text;
+                document.getElementById("nameSelect").value = savedUser;
+                document.getElementById("nameSelect").disabled = true;
+                document.getElementById("lockedStatus").innerText = `Locked: ${userName}`;
+                document.getElementById("checkIn").disabled = false;
+                document.getElementById("checkOut").disabled = false;
+            }
+            loadLogsFromLocalStorage();
+        };
+        
+        function startScanner() {
+            document.getElementById("reader").style.display = "block";
+            if (!scanner) {
+                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+                scanner.render(validateCode);
+            }
+        }
+
+        document.getElementById("checkIn").addEventListener("click", function() {
+            scanEnabled = true;
+            mode = "Check In";
+            startScanner();
+        });
+        
+        document.getElementById("checkOut").addEventListener("click", function() {
+            scanEnabled = true;
+            mode = "Check Out";
+            startScanner();
+        });
+        
+let lastScanTime = 0; // Track the last scan time
+
+function validateCode(scannedCode) {
+    const now = new Date();
+    const currentTime = now.getTime(); // Get current timestamp in milliseconds
+
+    if (!scanEnabled) return;
+
+    // Ensure at least 30 minutes have passed since the last successful scan
+    if (currentTime - lastScanTime < 1800000) { 
+        document.getElementById("status").innerText = "Biometric recorded Successfully.";
+        document.getElementById("status").style.color = "orange";
+        return; // Ignore scan if within cooldown period
+    }
+
+    const localDate = now.getFullYear() + '-' +
+                      (now.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                      now.getDate().toString().padStart(2, '0');
+    const localTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
+    const hhmm = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0');
+
+    if (scannedCode === hhmm) {
+        let logEntry = `${biometricNumber}\t${localDate} ${localTime}\t1\t${mode === "Check In" ? "0" : "1"}\t1\t0`;
+        logs.push(logEntry);
+        saveLogsToLocalStorage();
+        document.getElementById("status").innerText = `Success: ${mode}`;
+        document.getElementById("status").style.color = "green";
+
+        lastScanTime = currentTime; // Update last scan time
+    } else {
+        document.getElementById("status").innerText = "Error: Invalid QR Code";
+        document.getElementById("status").style.color = "red";
+    }
+}
+
+        document.getElementById("downloadLog").addEventListener("click", function() {
+            if (logs.length === 0) return;
+            let logData = logs.join("\n");
+            let blob = new Blob([logData], { type: "text/plain" });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `${userName}_${biometricNumber}_attlog.dat`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+document.getElementById("sendEmail").addEventListener("click", function() {
+    if (logs.length === 0) return;
+    
+    let logData = logs.join("\n");
+    let blob = new Blob([logData], { type: "text/plain" });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "1_attlog.dat";
+    document.body.appendChild(a);
+    
+    // Create a mailto link
+    let email = "smsiazure@gmail.com";
+    let subject = encodeURIComponent(userName);
+    let body = encodeURIComponent("Attached is the attendance log file.");
+    
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    
+    document.body.removeChild(a);
+});
+    </script>
+</body>
+</html>
