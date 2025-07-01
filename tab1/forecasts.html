@@ -1,0 +1,67 @@
+    <style>
+        body, html {
+    font-family: "Varela round", sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 130vh;
+            overflow: hidden;
+        }
+    .tabs-container1 {
+      display: flex;
+    }
+
+    .tab1 {
+    padding: 5px 5px;
+      cursor: pointer;
+      color: white;
+      background-color: #545454;
+      border-right: 0px solid #545454;
+    }
+
+    .tab1.active {
+      background-color: #ffffff;
+      color: #545454;
+    }
+
+    .frame-right {
+      display: none;
+      width: 100%;
+      height: calc(100vh - 40px); /* adjust based on tab height */
+      border: none;
+    }
+
+    .frame-right.active {
+      display: block;
+    }
+</style>
+  <div class="tabs-container1" id="tabs-container1"  oncontextmenu="refreshFrameRight(event)">
+    <div class="tab1 active" onclick="openRightFrame(0)">Weather</div>
+    <div class="tab1" onclick="openRightFrame(1)">Traffic</div>
+  </div>
+  <iframe class="frame-right active" id="right-frame1" style=" height: 90vh;" src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=11&overlay=wind&product=ecmwf&level=surface&lat=14.439&lon=121.043&detailLat=14.484&detailLon=121.043&detail=true&message=true" frameborder="0"></iframe>
+  <iframe class="frame-right" id="right-frame2" src="https://embed.waze.com/iframe?zoom=13&lat=14.483966&lon=121.019211&ct=livemap" style="width:37vh;height:100vh;"></iframe>
+
+<script>
+  function openRightFrame(index) {
+    const tabs = document.querySelectorAll('.tab1');
+    const frames = document.querySelectorAll('.frame-right');
+
+    tabs.forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+      frames[i].classList.toggle('active', i === index);
+    });
+  }
+
+  // Refresh right frame on right-click (context menu)
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault(); // prevent default context menu
+
+    const activeFrame = document.querySelector('.frame-right.active');
+    if (activeFrame) {
+      const currentSrc = activeFrame.src;
+      activeFrame.src = ''; // force reload
+      activeFrame.src = currentSrc;
+    }
+  });
+</script>

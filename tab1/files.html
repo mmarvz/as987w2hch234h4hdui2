@@ -1,0 +1,72 @@
+    <style>
+        body, html {
+    font-family: "Varela round", sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+    .tabs-container1 {
+      display: flex;
+    }
+
+    .tab1 {
+    padding: 5px 5px;
+      cursor: pointer;
+      color: white;
+      background-color: #545454;
+      border-right: 0px solid #545454;
+    }
+
+    .tab1.active {
+      background-color: #ffffff;
+      color: #545454;
+    }
+
+    .frame-right {
+      display: none;
+    transform: scale(0.75);
+    transform-origin: top left;
+    width: 133%;
+    height: 120%;
+    border: none;
+    }
+
+    .frame-right.active {
+      display: block;
+    }
+</style>
+  <div class="tabs-container1" id="tabs-container1"  oncontextmenu="refreshFrameRight(event)">
+    <div class="tab1 active" onclick="openRightFrame(0)">Staff Files</div>
+    <div class="tab1" onclick="openRightFrame(1)">Scanned Files</div>
+    <div class="tab1" onclick="openRightFrame(2)">SMS Forms</div>
+    <div class="tab1" onclick="openRightFrame(3)">Azure Forms</div>
+  </div>
+  <iframe class="frame-right active" id="right-frame1" src="https://drive.google.com/embeddedfolderview?id=1eEiOFMeDtgVJRP5YSVlP3l9wJ8IZdKdh#grid"></iframe>
+  <iframe class="frame-right" id="right-frame2" src="https://drive.google.com/embeddedfolderview?id=1d26FN6j68aXzd7E5eT2JZKyrLyXShoji#grid"></iframe>
+  <iframe class="frame-right" id="right-frame3" src="https://drive.google.com/embeddedfolderview?id=1q26GqgFqdQrYYlDhA-kBDriLuO-fhrqd#grid"></iframe>
+  <iframe class="frame-right" id="right-frame4" src="https://drive.google.com/embeddedfolderview?id=1revfj1uwGGpxhSpar_zhKuyWIHT2Cx1M#grid"></iframe>
+<script>
+  function openRightFrame(index) {
+    const tabs = document.querySelectorAll('.tab1');
+    const frames = document.querySelectorAll('.frame-right');
+
+    tabs.forEach((tab, i) => {
+      tab.classList.toggle('active', i === index);
+      frames[i].classList.toggle('active', i === index);
+    });
+  }
+
+  // Refresh right frame on right-click (context menu)
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault(); // prevent default context menu
+
+    const activeFrame = document.querySelector('.frame-right.active');
+    if (activeFrame) {
+      const currentSrc = activeFrame.src;
+      activeFrame.src = ''; // force reload
+      activeFrame.src = currentSrc;
+    }
+  });
+</script>
