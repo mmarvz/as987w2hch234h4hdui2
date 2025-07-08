@@ -52,6 +52,7 @@ button svg {
 .page-heading {
     margin-top: 7px;
     font-family: impact, sans-serif;
+    font-size: 17px;
 }
 .printBtn {
   border: none;
